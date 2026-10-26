@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -330,15 +329,6 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
               {chrome(lang, "hello")}
               {authReady ? `, ${displayName}` : ""}
             </h1>
-            <figure className="home-photo">
-              <Image
-                src="/img/capitol-hero.jpg"
-                alt="California State Capitol"
-                width={144}
-                height={96}
-              />
-              <figcaption>{chrome(lang, "photoCredit")}</figcaption>
-            </figure>
           </div>
           <div className="home-interests">
             <span>{chrome(lang, "basedOnInterests")}</span>{" "}
