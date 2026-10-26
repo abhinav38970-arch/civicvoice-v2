@@ -9,8 +9,6 @@ export function PublicFooter() {
     <footer className="public-footer">
       <a href="#">{chrome(lang, "footerPrivacy")}</a>
       <a href="#">{chrome(lang, "footerSecurity")}</a>
-      <a href="#">{chrome(lang, "footerAccessibility")}</a>
-      <a href="#">{chrome(lang, "footerTransparency")}</a>
       <a
         href="https://registertovote.ca.gov/"
         target="_blank"
