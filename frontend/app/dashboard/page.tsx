@@ -11,7 +11,6 @@ const TABS: PortalNav[] = [
   "news",
   "ballot",
   "services",
-  "report",
   "ask",
 ];
 

@@ -308,9 +308,9 @@ function AuthLandingInner({
                   />
                   <span>
                     {chrome(lang, "consentLead")}{" "}
-                    <a href="#">{chrome(lang, "footerPrivacy")}</a>{" "}
+                    <a href="/privacy">{chrome(lang, "footerPrivacy")}</a>{" "}
                     {chrome(lang, "andWord")}{" "}
-                    <a href="#">{chrome(lang, "footerSecurity")}</a>{" "}
+                    <a href="/security">{chrome(lang, "footerSecurity")}</a>{" "}
                     {chrome(lang, "policiesWord")}
                   </span>
                 </label>

@@ -12,7 +12,6 @@ import { useI18n } from "@/lib/i18n";
 import { LANG_META, type LangCode } from "@/lib/langs";
 import type { PortalNav } from "@/lib/portal";
 import { PORTAL_NAV, navFromPath } from "@/lib/portal-nav";
-import { speechSupported, startDictation } from "@/lib/voice";
 
 export function PortalShell({
   active,
@@ -29,14 +28,8 @@ export function PortalShell({
   const pathname = usePathname() || "/home";
   const current = active ?? navFromPath(pathname);
   const [q, setQ] = useState("");
-  const [micOk, setMicOk] = useState(false);
-  const [listening, setListening] = useState(false);
   const [sessionName, setSessionName] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
-
-  useEffect(() => {
-    setMicOk(speechSupported());
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,21 +69,6 @@ export function PortalShell({
     router.push(`/ask?q=${encodeURIComponent(query)}`);
   }
 
-  function onMic() {
-    setListening(true);
-    const stop = startDictation(lang, (text) => {
-      setQ(text);
-      setListening(false);
-    });
-    if (!stop) setListening(false);
-    else {
-      window.setTimeout(() => {
-        stop();
-        setListening(false);
-      }, 8000);
-    }
-  }
-
   return (
     <div className="portal-shell">
       <a className="skip-link" href="#main-content">
@@ -101,11 +79,7 @@ export function PortalShell({
           <Link className="portal-brand" href="/home">
             CivicVoice
           </Link>
-          <form
-            className={`portal-search${listening ? " is-listening" : ""}`}
-            role="search"
-            onSubmit={onSearch}
-          >
+          <form className="portal-search" role="search" onSubmit={onSearch}>
             <label className="sr-only" htmlFor="global-search">
               {chrome(lang, "searchPlaceholder")}
             </label>
@@ -119,17 +93,6 @@ export function PortalShell({
                 onChange={(e) => setQ(e.target.value)}
                 autoComplete="off"
               />
-              <button
-                type="button"
-                id="portalMic"
-                className="portal-mic"
-                hidden={!micOk}
-                aria-pressed={listening}
-                aria-label="Microphone"
-                onClick={onMic}
-              >
-                <span aria-hidden>🎤</span>
-              </button>
             </span>
             <button type="submit" className="portal-search-go">
               {chrome(lang, "searchButton")}

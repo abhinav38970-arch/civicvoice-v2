@@ -128,5 +128,4 @@ export type PortalNav =
   | "news"
   | "ballot"
   | "services"
-  | "report"
   | "ask";
