@@ -46,6 +46,24 @@ API smoke checks: `GET /health`, `POST /api/auth/signup`, `POST /api/auth/login`
 
 Ask works without an LLM key: it returns retrieved document pieces (and seeded example answers when the question matches). Set `CIVICVOICE_LLM_*` only when you want generated summaries.
 
+Frontend (local):
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:3000 — API calls go through `/backend` → FastAPI on port 5001 (cookies stay same-origin).
+
+Refresh official feed data (allowlisted CA / Alameda sources; `fremont.gov` blocks bots):
+
+```bash
+cd ingest
+source .venv/bin/activate
+python run_once.py
+```
+
 Folders:
 
 - `frontend/` — Next.js (step 5)

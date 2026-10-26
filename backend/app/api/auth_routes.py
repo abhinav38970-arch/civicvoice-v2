@@ -35,6 +35,13 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=200)
 
 
+class ProfileUpdateRequest(BaseModel):
+    interests: list[str] | None = None
+    profession: str | None = None
+    city: str | None = Field(default=None, max_length=100)
+    preferred_language: str | None = None
+
+
 def _user_public(row: dict[str, Any]) -> dict[str, Any]:
     return {
         "id": str(row["id"]),
@@ -150,3 +157,51 @@ def logout(response: Response) -> dict:
 @router.get("/me")
 def me(user: Annotated[dict, Depends(get_current_user)]) -> dict:
     return {"user": _user_public(user)}
+
+
+@router.post("/profile")
+def update_profile(
+    body: ProfileUpdateRequest,
+    user: Annotated[dict, Depends(get_current_user)],
+) -> dict:
+    # Partial update: omitted fields keep current values.
+    if body.interests is None:
+        interests = list(user["interests"] or [])
+    else:
+        interests = [i.strip() for i in body.interests if i and i.strip()]
+
+    city = (
+        body.city.strip()
+        if body.city is not None and body.city.strip()
+        else (user["city"] or "Fremont")
+    )
+    if body.profession is None:
+        profession = user.get("profession")
+    else:
+        profession = body.profession.strip() or None
+
+    lang = (
+        body.preferred_language or user["preferred_language"] or "en"
+    ).lower()
+    if lang not in SUPPORTED_LANGUAGES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported language. Use one of: {', '.join(SUPPORTED_LANGUAGES)}",
+        )
+
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            UPDATE users
+            SET interests = %s,
+                profession = %s,
+                city = %s,
+                preferred_language = %s
+            WHERE id = %s
+            RETURNING id, email, preferred_language, city, interests, profession, created_at
+            """,
+            (interests, profession, city, lang, user["id"]),
+        ).fetchone()
+        conn.commit()
+
+    return {"ok": True, "user": _user_public(row)}

@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Annotated, Any
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
-from app.api.deps import get_current_user
 from app.config import SUPPORTED_LANGUAGES, get_settings
 from app.redis_client import get_redis
 from app.retriever import retrieve_chunks
@@ -15,10 +14,13 @@ from app.summarizer import find_example_answer, summarize_with_llm
 
 router = APIRouter(prefix="/api", tags=["ask"])
 
+DEFAULT_CITY = "Fremont"
+
 
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     language: str = "en"
+    city: str = DEFAULT_CITY
 
 
 def _cache_key(question: str, language: str, city: str) -> str:
@@ -27,10 +29,10 @@ def _cache_key(question: str, language: str, city: str) -> str:
     return f"ask:{digest}"
 
 
-def _rate_limit(user_id: str) -> None:
+def _rate_limit(bucket: str) -> None:
     settings = get_settings()
     r = get_redis()
-    key = f"ask_rate:{user_id}"
+    key = f"ask_rate:{bucket}"
     count = int(r.incr(key))
     if count == 1:
         r.expire(key, settings.ask_rate_window_seconds)
@@ -61,10 +63,7 @@ def _citations_from_chunks(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]
 
 
 @router.post("/ask")
-def ask(
-    body: AskRequest,
-    user: Annotated[dict, Depends(get_current_user)],
-) -> dict:
+def ask(body: AskRequest, request: Request) -> dict:
     question = body.question.strip()
     if not question:
         raise HTTPException(
@@ -79,8 +78,10 @@ def ask(
             detail=f"Unsupported language. Use one of: {', '.join(SUPPORTED_LANGUAGES)}",
         )
 
-    _rate_limit(str(user["id"]))
-    city = user["city"]
+    city = (body.city or DEFAULT_CITY).strip() or DEFAULT_CITY
+    client = request.client.host if request.client else "anon"
+    _rate_limit(client)
+
     settings = get_settings()
     r = get_redis()
     cache_key = _cache_key(question, language, city)
@@ -91,11 +92,9 @@ def ask(
         payload["cached"] = True
         return payload
 
-    # Pre-checked demo answers (no LLM required)
     example = find_example_answer(question, language, city)
     if example is not None:
         chunks = retrieve_chunks(question, city=city, limit=8)
-        # Prefer chunks linked on the example if present
         payload = {
             "question": question,
             "language": language,
@@ -128,7 +127,6 @@ def ask(
             "cached": False,
         }
     else:
-        # Architecture: never invent a summary without a key / if checks fail
         message = (
             "A summary is not available. Here are the relevant document pieces."
         )

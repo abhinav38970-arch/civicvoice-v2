@@ -1,0 +1,29 @@
+/* CivicVoice v2 — orange and white portal tokens */
+:root {
+  --orange: #e8590c;
+  --orange-dark: #c2410c;
+  --orange-tint: #fff4ec;
+  --ink: #1f2937;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --line-warm: #e8e0d8;
+  --card: #ffffff;
+  --bg: #fafafa;
+  --success: #0d6e4f;
+  --warn-bg: #fff8e6;
+  --warn-ink: #7a4d00;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --shadow: 0 1px 3px rgba(31, 41, 55, 0.06);
+  --focus-ring: 0 0 0 3px #fff, 0 0 0 5px var(--orange);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --max-width: 1200px;
+  --sidebar-width: 240px;
+  --font-size-base: 17px;
+}
+
+:root {
+  --accent: var(--orange);
+  --accent-dark: var(--orange-dark);
+  --accent-soft: var(--orange-tint);
+}
