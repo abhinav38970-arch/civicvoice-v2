@@ -1,0 +1,2 @@
+-- Full schema is produced from files in db/migrations/ (step 1).
+-- Do not hand-edit production from this file; apply migrations in order.
