@@ -7,8 +7,8 @@ export function PublicFooter() {
   const { lang } = useI18n();
   return (
     <footer className="public-footer">
-      <a href="#">{chrome(lang, "footerPrivacy")}</a>
-      <a href="#">{chrome(lang, "footerSecurity")}</a>
+      <a href="/privacy">{chrome(lang, "footerPrivacy")}</a>
+      <a href="/security">{chrome(lang, "footerSecurity")}</a>
       <a
         href="https://registertovote.ca.gov/"
         target="_blank"
