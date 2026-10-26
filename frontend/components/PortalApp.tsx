@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import { CitationDrawer, type DrawerPayload } from "@/components/CitationDrawer";
 import { PortalShell } from "@/components/PortalShell";
@@ -19,7 +19,7 @@ import {
   type PortalNav,
 } from "@/lib/portal";
 import { filterBallotsByCategory, filterNewsByTopic } from "@/lib/topics";
-import { speakText, speechSupported, startDictation } from "@/lib/voice";
+import { speakText } from "@/lib/voice";
 
 function PortalAppInner({ tab }: { tab: PortalNav }) {
   const { lang } = useI18n();
@@ -46,7 +46,6 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
   const [askResult, setAskResult] = useState<AskResponse | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
-  const micOk = useMemo(() => speechSupported(), []);
   const displayName = user
     ? nameFromEmail(user.email)
     : chrome(lang, "guest");
@@ -598,15 +597,6 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
                 }}
                 placeholder={chrome(lang, "askPlaceholder")}
               />
-              {micOk && (
-                <button
-                  type="button"
-                  className="icon-btn mic-inside"
-                  onClick={() => startDictation(lang, setQuery)}
-                >
-                  🎙️
-                </button>
-              )}
             </div>
             <button
               type="button"
