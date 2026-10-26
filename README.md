@@ -42,7 +42,9 @@ python seed_fremont.py
 uvicorn app.main:app --reload --host 0.0.0.0 --port 5001
 ```
 
-API smoke checks: `GET /health`, `POST /api/auth/signup`, `POST /api/auth/login`, `GET /api/feed`, `GET /api/auth/me`.
+API smoke checks: `GET /health`, `POST /api/auth/signup`, `POST /api/auth/login`, `GET /api/feed`, `GET /api/auth/me`, `POST /api/ask`.
+
+Ask works without an LLM key: it returns retrieved document pieces (and seeded example answers when the question matches). Set `CIVICVOICE_LLM_*` only when you want generated summaries.
 
 Folders:
 

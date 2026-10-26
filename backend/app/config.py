@@ -41,6 +41,19 @@ class Settings(BaseSettings):
     login_max_failures: int = 10
     login_lockout_seconds: int = 600  # 10 minutes
 
+    # Ask
+    ask_rate_limit: int = 20
+    ask_rate_window_seconds: int = 60
+    ask_cache_ttl_seconds: int = 60 * 30  # 30 minutes
+
+    # LLM (empty key => document-only fallback, never invent summaries)
+    civicvoice_llm_api_key: str = ""
+    civicvoice_llm_base_url: str = ""
+    civicvoice_llm_model: str = ""
+
+    # Embeddings (sentence-transformers e5). Off until model is installed.
+    embeddings_enabled: bool = False
+
 
 @lru_cache
 def get_settings() -> Settings:

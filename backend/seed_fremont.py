@@ -173,6 +173,43 @@ def seed() -> None:
             """,
             (added_chunks, run_id),
         )
+
+        examples = [
+            (
+                "What did the city council decide about housing?",
+                "en",
+                "On March 10, the Fremont City Council approved an update to the Housing Element. "
+                "The plan describes how the city intends to meet state housing goals over the next "
+                "eight years. Public comments emphasized affordable housing near BART and protecting "
+                "existing neighborhoods. [1]",
+                "Fremont",
+            ),
+            (
+                "Is Warm Springs Boulevard being resurfaced?",
+                "en",
+                "Yes. Public Works plans to resurface Warm Springs Boulevard between South Grimmer "
+                "and Mission Boulevard, with weekday lane closures from 9 a.m. to 3 p.m. [1]",
+                "Fremont",
+            ),
+        ]
+        for question, lang, answer, ex_city in examples:
+            exists = conn.execute(
+                """
+                SELECT 1 FROM example_answers
+                WHERE lower(question) = lower(%s) AND lower(language) = lower(%s)
+                LIMIT 1
+                """,
+                (question, lang),
+            ).fetchone()
+            if not exists:
+                conn.execute(
+                    """
+                    INSERT INTO example_answers (question, language, answer, city)
+                    VALUES (%s, %s, %s, %s)
+                    """,
+                    (question, lang, answer, ex_city),
+                )
+
         conn.commit()
 
     close_pool()

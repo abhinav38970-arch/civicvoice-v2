@@ -75,7 +75,7 @@ CREATE TABLE chunks (
     text            TEXT NOT NULL,
     page            INTEGER,
     text_hash       TEXT NOT NULL,
-    embedding       vector(1024),
+    embedding       vector(768),
     is_active       BOOLEAN NOT NULL DEFAULT true,
     last_seen_run   UUID REFERENCES ingest_runs (id) ON DELETE SET NULL,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
