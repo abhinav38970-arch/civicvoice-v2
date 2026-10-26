@@ -1,0 +1,38 @@
+# Local-only stack for CivicVoice development.
+# Start: docker compose up -d
+# Stop:  docker compose down
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: civicvoice-db
+    environment:
+      POSTGRES_USER: civicvoice
+      POSTGRES_PASSWORD: civicvoice
+      POSTGRES_DB: civicvoice
+    ports:
+      - "5432:5432"
+    volumes:
+      - civicvoice_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U civicvoice -d civicvoice"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: civicvoice-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - civicvoice_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  civicvoice_pgdata:
+  civicvoice_redis:
