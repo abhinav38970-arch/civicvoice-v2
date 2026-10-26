@@ -24,6 +24,12 @@ docker compose ps
 | Postgres | `localhost:5432` (user/pass/db: `civicvoice`) |
 | Redis | `localhost:6379` |
 
+Apply database migrations (local Docker only — no cloud DB required):
+
+```bash
+./db/migrate.sh
+```
+
 Folders:
 
 - `frontend/` — Next.js (step 5)
