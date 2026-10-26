@@ -21,18 +21,6 @@ import {
 import { filterBallotsByCategory, filterNewsByTopic } from "@/lib/topics";
 import { speakText, speechSupported, startDictation } from "@/lib/voice";
 
-type SavedReport = { issue: string; location: string; body: string; at: string };
-const REPORTS_KEY = "civicvoice_reports";
-
-function loadReports(): SavedReport[] {
-  try {
-    const raw = localStorage.getItem(REPORTS_KEY);
-    return raw ? (JSON.parse(raw) as SavedReport[]) : [];
-  } catch {
-    return [];
-  }
-}
-
 function PortalAppInner({ tab }: { tab: PortalNav }) {
   const { lang } = useI18n();
   const params = useSearchParams();
@@ -52,15 +40,6 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerDocId, setDrawerDocId] = useState<string | null>(null);
 
-  const [issue, setIssue] = useState("Pothole");
-  const [desc, setDesc] = useState("");
-  const [gps, setGps] = useState("");
-  const [gpsStatus, setGpsStatus] = useState("");
-  const [reportBody, setReportBody] = useState("");
-  const [reportShown, setReportShown] = useState(false);
-  const [copyStatus, setCopyStatus] = useState("");
-  const [reports, setReports] = useState<SavedReport[]>([]);
-
   const [query, setQuery] = useState(params.get("q") || "");
   const [askBusy, setAskBusy] = useState(false);
   const [askStatus, setAskStatus] = useState("");
@@ -71,10 +50,6 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
   const displayName = user
     ? nameFromEmail(user.email)
     : chrome(lang, "guest");
-
-  useEffect(() => {
-    setReports(loadReports());
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -271,37 +246,6 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
     }
   }
 
-  function captureGps() {
-    if (!navigator.geolocation) {
-      setGpsStatus(chrome(lang, "gpsDenied"));
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setGps(
-          `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`,
-        );
-        setGpsStatus(chrome(lang, "locationReady"));
-      },
-      () => setGpsStatus(chrome(lang, "gpsDenied")),
-    );
-  }
-
-  function generateReport() {
-    const body = [
-      `Issue: ${issue}`,
-      `City: Fremont, CA`,
-      gps ? `Location: ${gps}` : "Location: (describe in text)",
-      "",
-      "Description:",
-      desc.trim() || "(none)",
-      "",
-      "Generated with CivicVoice — paste into fremont.gov request form.",
-    ].join("\n");
-    setReportBody(body);
-    setReportShown(true);
-  }
-
   const filteredNews = filterNewsByTopic(news, newsSub);
   const newsTopicEmpty =
     !loadingNews && news.length > 0 && filteredNews.length === 0;
@@ -350,9 +294,9 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
           </div>
           <div className="quick-links">
             <Link href="/ballot">{chrome(lang, "homeQuickBallot")}</Link>
-            <Link href="/report">{chrome(lang, "homeQuickReport")}</Link>
             <Link href="/ask">{chrome(lang, "homeQuickAsk")}</Link>
             <Link href="/news">{chrome(lang, "homeQuickMeetings")}</Link>
+            <Link href="/services">{chrome(lang, "navServices")}</Link>
           </div>
           <section>
             <h2 style={{ fontSize: "1.1rem", margin: "16px 0 12px" }}>
@@ -634,124 +578,6 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
-      )}
-
-      {tab === "report" && (
-        <div className="portal-content" style={{ maxWidth: 780 }}>
-          <h1>{chrome(lang, "reportTitle")}</h1>
-          <p className="lead">{chrome(lang, "reportSub")}</p>
-          <div className="issue-grid">
-            {(
-              [
-                ["Pothole", "issuePothole"],
-                ["Illegal dumping", "issueDumping"],
-                ["Broken streetlight", "issueStreetlight"],
-                ["Other", "issueOther"],
-              ] as const
-            ).map(([en, key]) => (
-              <button
-                key={en}
-                type="button"
-                className={`issue-btn${issue === en ? " active" : ""}`}
-                onClick={() => setIssue(en)}
-              >
-                <span>{chrome(lang, key)}</span>
-              </button>
-            ))}
-          </div>
-          <textarea
-            className="report-text"
-            rows={3}
-            placeholder={chrome(lang, "describePlaceholder")}
-            value={desc}
-            onChange={(e) => setDesc(e.target.value)}
-          />
-          <div className="row">
-            {micOk && (
-              <button
-                type="button"
-                className="chip-btn"
-                onClick={() =>
-                  startDictation(lang, (t) =>
-                    setDesc((d) => (d ? `${d} ${t}` : t)),
-                  )
-                }
-              >
-                🎙️
-              </button>
-            )}
-            <button type="button" className="chip-btn" onClick={captureGps}>
-              {chrome(lang, "useLocation")}
-            </button>
-            <span className="muted">{gpsStatus}</span>
-          </div>
-          <button type="button" className="primary-btn" onClick={generateReport}>
-            {chrome(lang, "generateReport")}
-          </button>
-          {reportShown && (
-            <div className="report-out">
-              <pre className="report-pre">{reportBody}</pre>
-              <div className="row">
-                <button
-                  type="button"
-                  className="chip-btn"
-                  onClick={async () => {
-                    await navigator.clipboard.writeText(reportBody);
-                    setCopyStatus(chrome(lang, "copied"));
-                  }}
-                >
-                  {chrome(lang, "copyReport")}
-                </button>
-                <button
-                  type="button"
-                  className="chip-btn"
-                  onClick={() => {
-                    const next = [
-                      {
-                        issue,
-                        location: gps,
-                        body: reportBody,
-                        at: new Date().toISOString(),
-                      },
-                      ...loadReports(),
-                    ].slice(0, 20);
-                    localStorage.setItem(REPORTS_KEY, JSON.stringify(next));
-                    setReports(next);
-                    setCopyStatus(chrome(lang, "saved"));
-                  }}
-                >
-                  {chrome(lang, "saveReport")}
-                </button>
-                <a
-                  className="chip-btn"
-                  href="https://www.fremont.gov/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {chrome(lang, "openCity")}
-                </a>
-                <span className="muted">{copyStatus}</span>
-              </div>
-              <p className="muted">{chrome(lang, "cityNote")}</p>
-            </div>
-          )}
-          <h2 style={{ marginTop: 24 }}>{chrome(lang, "myReports")}</h2>
-          {reports.length === 0 && (
-            <p className="muted">{chrome(lang, "noReports")}</p>
-          )}
-          <div className="notices">
-            {reports.map((r, i) => (
-              <div
-                key={`${r.at}-${i}`}
-                className="notice-item"
-                style={{ cursor: "default" }}
-              >
-                <span className="notice-title">{r.issue}</span>
-                <span className="notice-date">{r.location}</span>
-              </div>
-            ))}
           </div>
         </div>
       )}
