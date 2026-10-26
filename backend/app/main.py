@@ -31,14 +31,24 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+_cors_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+    "https://civicvoice-v2.onrender.com",
+    "https://civicvoice-0b94.onrender.com",
+]
+# Extra origins from env (comma-separated), e.g. future custom domain.
+_extra = __import__("os").environ.get("CORS_ORIGINS", "")
+if _extra.strip():
+    _cors_origins.extend(
+        o.strip() for o in _extra.split(",") if o.strip()
+    )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3001",
-    ],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
