@@ -41,6 +41,20 @@ def main() -> None:
     added = updated = 0
     errors: list[str] = []
 
+    # Show target DB host so we don't accidentally ingest into localhost.
+    try:
+        from urllib.parse import urlparse
+
+        host = urlparse(DATABASE_URL).hostname or "?"
+        print(f"ingest target host={host}")
+        if host in {"localhost", "127.0.0.1"}:
+            print(
+                "WARNING: writing to local DB. For Render, set DATABASE_URL to the "
+                "External Database URL first."
+            )
+    except Exception:  # noqa: BLE001
+        pass
+
     with psycopg.connect(DATABASE_URL, row_factory=dict_row) as conn:
         run = conn.execute(
             """
