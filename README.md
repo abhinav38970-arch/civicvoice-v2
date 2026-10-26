@@ -30,6 +30,20 @@ Apply database migrations (local Docker only — no cloud DB required):
 ./db/migrate.sh
 ```
 
+Backend (local):
+
+```bash
+cd backend
+# Use Python 3.12 (system python3 may be 3.14, which is too new for our deps)
+/usr/local/bin/python3.12 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python seed_fremont.py
+uvicorn app.main:app --reload --host 0.0.0.0 --port 5001
+```
+
+API smoke checks: `GET /health`, `POST /api/auth/signup`, `POST /api/auth/login`, `GET /api/feed`, `GET /api/auth/me`.
+
 Folders:
 
 - `frontend/` — Next.js (step 5)
