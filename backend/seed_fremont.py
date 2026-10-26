@@ -80,6 +80,56 @@ DOCUMENTS = [
             "near the Fremont BART station.",
         ],
     },
+    {
+        "title": "Fremont Fire Department reminds residents of wildfire preparedness",
+        "url": "https://www.fremont.gov/sample/fire-preparedness",
+        "type": "news",
+        "days_ago": 1,
+        "chunks": [
+            "The Fremont Fire Department urges public safety awareness during fire season. "
+            "Keep emergency kits ready and clear brush near homes.",
+        ],
+    },
+    {
+        "title": "City job fair connects residents with local employers",
+        "url": "https://www.fremont.gov/sample/job-fair",
+        "type": "news",
+        "days_ago": 4,
+        "chunks": [
+            "Fremont Economic Development hosts a jobs and business career fair "
+            "for residents seeking employment with local employers.",
+        ],
+    },
+    {
+        "title": "Unified School District updates after-school education programs",
+        "url": "https://www.fremont.gov/sample/school-programs",
+        "type": "news",
+        "days_ago": 6,
+        "chunks": [
+            "Fremont Unified shares education updates for students and families "
+            "on after-school tutoring and campus programs.",
+        ],
+    },
+    {
+        "title": "County health clinic expands walk-in hours",
+        "url": "https://www.fremont.gov/sample/health-clinic",
+        "type": "news",
+        "days_ago": 8,
+        "chunks": [
+            "Alameda County health services expand clinic hours for vaccines "
+            "and wellness visits in Fremont.",
+        ],
+    },
+    {
+        "title": "CalFresh and immigration assistance workshop at the library",
+        "url": "https://www.fremont.gov/sample/benefits-workshop",
+        "type": "news",
+        "days_ago": 9,
+        "chunks": [
+            "Community services offers benefits enrollment help covering CalFresh, "
+            "Medi-Cal, and immigration resource referrals.",
+        ],
+    },
 ]
 
 

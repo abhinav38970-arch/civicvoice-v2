@@ -62,6 +62,11 @@ def get_feed(
             FROM documents d
             JOIN sources s ON s.id = d.source_id
             WHERE lower(d.city) = lower(%s)
+              AND s.status = 'active'
+              AND EXISTS (
+                SELECT 1 FROM chunks c
+                WHERE c.document_id = d.id AND c.is_active = true
+              )
             ORDER BY d.published_at DESC NULLS LAST
             LIMIT 200
             """,

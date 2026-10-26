@@ -149,21 +149,28 @@ activemq-data/
 # SageMath parsed files
 *.sage.py
 
-# Environments
+# Environments / secrets
 .env
 .env.*
 !.env.example
 .envrc
-.venv
-env/
+
+# Python virtualenvs (any path)
+.venv/
+**/.venv/
 venv/
+**/venv/
+env/
 ENV/
 env.bak/
 venv.bak/
+*.venv/
 
 # Node / Next.js
 node_modules/
+**/node_modules/
 .next/
+**/.next/
 out/
 .turbo/
 npm-debug.log*

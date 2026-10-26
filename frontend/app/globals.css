@@ -1,0 +1,24 @@
+@import "./styles/tokens.css";
+@import "./styles/portal.css";
+@import "./styles/legacy.css";
+
+/* Next.js Link + sticky portal chrome */
+a.portal-brand,
+a.public-brand {
+  text-decoration: none;
+  color: var(--ink);
+}
+.portal-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+}
+.portal-nav a {
+  text-decoration: none !important;
+}
+.portal-nav a[aria-current="page"],
+.portal-nav a.is-active {
+  border-bottom-color: var(--orange) !important;
+  color: var(--orange-dark) !important;
+}
