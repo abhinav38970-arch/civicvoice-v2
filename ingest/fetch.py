@@ -38,7 +38,10 @@ def fetch_html(url: str, timeout: float = 30.0) -> tuple[str, str]:
 
 
 def html_to_text(html: str) -> str:
-    soup = BeautifulSoup(html, "lxml")
+    try:
+        soup = BeautifulSoup(html, "lxml")
+    except Exception:  # noqa: BLE001 — fall back if lxml missing
+        soup = BeautifulSoup(html, "html.parser")
     for tag in soup(["script", "style", "noscript", "svg", "nav", "footer", "header"]):
         tag.decompose()
     text = soup.get_text("\n")
