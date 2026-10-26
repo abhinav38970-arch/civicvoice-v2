@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -114,9 +115,9 @@ function AuthLandingInner({
         {chrome(lang, "skipLink")}
       </a>
       <header className="public-top">
-        <a className="public-brand" href="/">
+        <Link className="public-brand" href="/">
           Civic<span>Voice</span>
-        </a>
+        </Link>
         <form className="lang-mini" onSubmit={(e) => e.preventDefault()}>
           <label className="sr-only" htmlFor="util-lang">
             {chrome(lang, "changeLanguage")}
