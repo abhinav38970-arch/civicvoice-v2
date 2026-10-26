@@ -129,6 +129,7 @@ export type ChromeKey =
   | "navReport"
   | "navServices"
   | "newsAll"
+  | "newsForYou"
   | "newsEmpty"
   | "newsTopicEmpty"
   | "newsForYou"
@@ -740,6 +741,9 @@ const TABLES: Record<string, Partial<Record<ChromeKey, string>>> = {
     cityOptional: "Ciudad (opcional)",
     city_alameda: "Condado de Alameda",
     city_all: "Todas las ciudades",
+    city_fremont: "Fremont",
+    city_newark: "Newark",
+    city_union_city: "Union City",
     closeBtn: "Cerrar",
     consentLead: "Acepto la",
     consentProfile: "Entiendo que CivicVoice guarda mis preferencias para personalizar el contenido.",
@@ -1851,6 +1855,9 @@ const TABLES: Record<string, Partial<Record<ChromeKey, string>>> = {
     cityOptional: "Lungsod (opsyonal)",
     city_alameda: "Kondado ng Alameda",
     city_all: "Lahat ng lungsod",
+    city_fremont: "Fremont",
+    city_newark: "Newark",
+    city_union_city: "Union City",
     closeBtn: "Isara",
     consentLead: "Sumasang-ayon ako sa",
     consentProfile: "Nauunawaan ko na iniimbak ng CivicVoice ang mga gusto ko para i-personalize ang nilalaman.",
@@ -2062,6 +2069,9 @@ const TABLES: Record<string, Partial<Record<ChromeKey, string>>> = {
     cityOptional: "Thành phố (không bắt buộc)",
     city_alameda: "Quận Alameda",
     city_all: "Tất cả thành phố",
+    city_fremont: "Fremont",
+    city_newark: "Newark",
+    city_union_city: "Union City",
     closeBtn: "Đóng",
     consentLead: "Tôi đồng ý với",
     consentProfile: "Tôi hiểu CivicVoice lưu tùy chọn của tôi để cá nhân hóa nội dung.",

@@ -724,3 +724,46 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     min-height: 44px;
   }
 }
+
+/* News cards — v1 parity: two-column grid, meta line, status chip, Read source */
+.notices.notices-grid {
+  display: block;
+  column-count: 2;
+  column-gap: 14px;
+}
+.notice-card {
+  break-inside: avoid;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 0 0 14px;
+}
+.notice-card-title {
+  margin: 0 0 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+.notice-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+.notice-card .text-cta {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  color: var(--accent-dark);
+}
+.notice-card .text-cta:hover { text-decoration: underline; }
+@media (max-width: 760px) {
+  .notices.notices-grid { column-count: 1; }
+}

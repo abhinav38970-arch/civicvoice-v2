@@ -157,7 +157,7 @@ export const api = {
     );
   },
 
-  notices: (limit = 20, language = "en", city = "Fremont") => {
+  notices: (limit = 20, language = "en", city = "all") => {
     const q = new URLSearchParams({
       limit: String(limit),
       language,
@@ -168,7 +168,7 @@ export const api = {
     );
   },
 
-  ballots: (limit = 20, language = "en", city = "Fremont") => {
+  ballots: (limit = 20, language = "en", city = "all") => {
     const q = new URLSearchParams({
       limit: String(limit),
       language,

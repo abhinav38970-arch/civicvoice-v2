@@ -5,10 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 import { CitationDrawer, type DrawerPayload } from "@/components/CitationDrawer";
+import { CityChips, useSelectedCity } from "@/components/CityChips";
 import { PortalShell } from "@/components/PortalShell";
 import { api, type AskResponse, type FeedItem, type User } from "@/lib/api";
 import { chrome } from "@/lib/chrome";
-import { formatFeedDate, nameFromEmail } from "@/lib/format";
+import { formatFeedDate, isArchivedRecord, nameFromEmail } from "@/lib/format";
 import { useI18n } from "@/lib/i18n";
 import {
   BALLOT_SIDEBAR,
@@ -32,6 +33,7 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
   const [loadingHome, setLoadingHome] = useState(true);
   const [loadingBallots, setLoadingBallots] = useState(true);
   const [newsSub, setNewsSub] = useState("all");
+  const [newsCity, setNewsCity] = useSelectedCity();
   const [ballotSub, setBallotSub] = useState("measures");
   const [servicesSub, setServicesSub] = useState("streets");
   const [ballotDetail, setBallotDetail] = useState<FeedItem | null>(null);
@@ -85,8 +87,8 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
     setLoadingBallots(true);
 
     Promise.all([
-      api.notices(30, lang, "Fremont"),
-      api.ballots(30, lang, "Fremont"),
+      api.notices(40, lang, newsCity),
+      api.ballots(30, lang, newsCity),
     ])
       .then(([n, b]) => {
         if (cancelled) return;
@@ -118,7 +120,7 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
     return () => {
       cancelled = true;
     };
-  }, [lang, ballotDetailId]);
+  }, [lang, ballotDetailId, newsCity]);
 
   useEffect(() => {
     if (!drawerOpen || !drawerDocId) return;
@@ -245,7 +247,11 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
     }
   }
 
-  const filteredNews = filterNewsByTopic(news, newsSub);
+  const filteredNews = filterNewsByTopic(
+    news,
+    newsSub,
+    user?.interests || [],
+  );
   const newsTopicEmpty =
     !loadingNews && news.length > 0 && filteredNews.length === 0;
   const newsCatalogEmpty = !loadingNews && news.length === 0;
@@ -301,6 +307,7 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
             <h2 style={{ fontSize: "1.1rem", margin: "16px 0 12px" }}>
               {chrome(lang, "homeFeed")}
             </h2>
+            <CityChips lang={lang} value={newsCity} onChange={setNewsCity} />
             {loadingHome && <p className="muted">{chrome(lang, "loading")}</p>}
             <div className="feed-grid">
               {homeFeed.slice(0, 6).map((item) => {
@@ -353,13 +360,14 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
             </nav>
           </aside>
           <div className="portal-content">
-            <h1>{chrome(lang, "newsTitle")}</h1>
+            <h1>
+              {chrome(
+                lang,
+                NEWS_SIDEBAR.find((s) => s.slug === newsSub)?.key ?? "newsTitle",
+              )}
+            </h1>
             <p className="lead">{chrome(lang, "noticesSub")}</p>
-            <div className="city-chips" role="group">
-              <button type="button" className="city-chip active">
-                {chrome(lang, "city_fremont")}
-              </button>
-            </div>
+            <CityChips lang={lang} value={newsCity} onChange={setNewsCity} />
             {loadingNews && <p className="muted">{chrome(lang, "loading")}</p>}
             {newsCatalogEmpty && (
               <p className="muted">{chrome(lang, "newsEmpty")}</p>
@@ -367,30 +375,41 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
             {newsTopicEmpty && (
               <p className="muted">{chrome(lang, "newsTopicEmpty")}</p>
             )}
-            <div className="notices">
+            <div className="notices notices-grid">
               {filteredNews.map((item) => {
-                const when = formatFeedDate(
-                  item.published_at || item.last_updated,
-                );
+                const stamp = item.published_at || item.last_updated;
+                const when = formatFeedDate(stamp);
+                const archived = isArchivedRecord(stamp);
+                // v1: "City of Fremont · Oct 19, 2026 · Current" + "Read source".
+                const cityLabel = item.city
+                  ? item.city === "Alameda County"
+                    ? item.city
+                    : `City of ${item.city}`
+                  : item.source_name;
                 return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className="notice-item"
-                    onClick={() => void openDocDrawer(item)}
-                  >
-                    <span>
-                      <span className="notice-title">{item.title}</span>
-                      <span className="notice-meta">{item.source_name}</span>
-                    </span>
-                    {when ? (
-                      <span className="notice-date">{when}</span>
-                    ) : (
-                      <span className="status-chip is-current">
-                        {chrome(lang, "statusCurrent")}
+                  <article key={item.id} className="notice-card">
+                    <p className="notice-card-title">{item.title}</p>
+                    <p className="notice-card-meta">
+                      <span>
+                        {[cityLabel, when].filter(Boolean).join(" · ")}
                       </span>
-                    )}
-                  </button>
+                      <span
+                        className={`status-chip ${archived ? "is-archived" : "is-current"}`}
+                      >
+                        {chrome(
+                          lang,
+                          archived ? "statusArchived" : "statusCurrent",
+                        )}
+                      </span>
+                    </p>
+                    <button
+                      type="button"
+                      className="text-cta"
+                      onClick={() => void openDocDrawer(item)}
+                    >
+                      {chrome(lang, "ctaReadSource")}
+                    </button>
+                  </article>
                 );
               })}
             </div>
@@ -424,6 +443,7 @@ function PortalAppInner({ tab }: { tab: PortalNav }) {
             {!ballotDetail && (
               <>
                 <p className="lead">{chrome(lang, ballotLeadKey)}</p>
+                <CityChips lang={lang} value={newsCity} onChange={setNewsCity} />
                 {ballotSub === "basics" && (
                   <p className="muted">
                     <a

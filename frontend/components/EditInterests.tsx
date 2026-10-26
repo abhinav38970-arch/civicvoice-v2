@@ -15,6 +15,7 @@ const CITIES = [
   { id: "Fremont", key: "city_fremont" as const },
   { id: "Newark", key: "city_newark" as const },
   { id: "Union City", key: "city_union_city" as const },
+  { id: "Alameda County", key: "city_alameda" as const },
 ];
 
 export function EditInterests() {

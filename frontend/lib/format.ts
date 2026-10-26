@@ -17,6 +17,17 @@ export function formatFeedDate(
   }
 }
 
+/** v1 parity: records older than ~90 days read as "Archived record". */
+export function isArchivedRecord(
+  iso: string | null | undefined,
+  days = 90,
+): boolean {
+  if (!iso) return false;
+  const t = Date.parse(iso);
+  if (Number.isNaN(t)) return false;
+  return Date.now() - t > days * 24 * 60 * 60 * 1000;
+}
+
 /** Display name from email local-part, e.g. "ada.lovelace@x.com" → "Ada". */
 export function nameFromEmail(email: string): string {
   const local = email.split("@")[0] || email;
