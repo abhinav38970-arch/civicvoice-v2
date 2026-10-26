@@ -13,6 +13,29 @@ from app.translate import translate_text
 router = APIRouter(prefix="/api", tags=["catalog"])
 
 DEFAULT_CITY = "Fremont"
+# CA-14 region cities shown in the News city filter (matches v1 pills).
+REGION_CITIES = ("Fremont", "Newark", "Union City", "Alameda County")
+
+
+def _normalize_city_filter(city: str) -> str | tuple[str, ...]:
+    """Return 'all' region tuple, or a single city name for exact match."""
+    raw = (city or "").strip()
+    if not raw or raw.lower() in ("all", "*", "all cities"):
+        return REGION_CITIES
+    # Accept common aliases from the GUI.
+    aliases = {
+        "alameda": "Alameda County",
+        "alameda county": "Alameda County",
+        "union city": "Union City",
+        "union_city": "Union City",
+    }
+    key = raw.lower()
+    if key in aliases:
+        return aliases[key]
+    for known in REGION_CITIES:
+        if known.lower() == key:
+            return known
+    return raw
 
 
 def _localize(text: str, language: str) -> tuple[str, bool]:
@@ -75,9 +98,17 @@ def _list_docs(
     limit: int,
     language: str,
 ) -> list[dict[str, Any]]:
+    city_filter = _normalize_city_filter(city)
+    if isinstance(city_filter, tuple):
+        city_clause = "lower(d.city) = ANY(%s)"
+        city_param: Any = [c.lower() for c in city_filter]
+    else:
+        city_clause = "lower(d.city) = lower(%s)"
+        city_param = city_filter
+
     with get_connection() as conn:
         rows = conn.execute(
-            """
+            f"""
             SELECT
                 d.id, d.title, d.url, d.published_at, d.type, d.city, d.language,
                 s.name AS source_name,
@@ -101,7 +132,7 @@ def _list_docs(
                 ) AS translated_snippet
             FROM documents d
             JOIN sources s ON s.id = d.source_id
-            WHERE lower(d.city) = lower(%s)
+            WHERE {city_clause}
               AND s.status = 'active'
               AND d.type = ANY(%s)
               AND EXISTS (
@@ -112,23 +143,34 @@ def _list_docs(
                 COALESCE(d.published_at, s.last_fetched_at) DESC NULLS LAST
             LIMIT %s
             """,
-            (language, city, list(types), limit),
+            (language, city_param, list(types), limit),
         ).fetchall()
     return [_serialize(r, language) for r in rows]
+
+
+def _response_city(city: str) -> str:
+    raw = (city or "").strip()
+    if not raw or raw.lower() in ("all", "*", "all cities"):
+        return "all"
+    normalized = _normalize_city_filter(raw)
+    if isinstance(normalized, tuple):
+        return "all"
+    return normalized
 
 
 @router.get("/notices")
 def get_notices(
     limit: int = Query(default=20, ge=1, le=100),
-    city: str = Query(default=DEFAULT_CITY),
+    city: str = Query(default="all"),
     language: str = Query(default="en"),
 ) -> dict:
     lang = language.lower().strip()
     if lang not in SUPPORTED_LANGUAGES:
         lang = "en"
-    items = _list_docs(city.strip() or DEFAULT_CITY, ("news", "council"), limit, lang)
+    city_q = city.strip() or "all"
+    items = _list_docs(city_q, ("news", "council"), limit, lang)
     return {
-        "city": city.strip() or DEFAULT_CITY,
+        "city": _response_city(city_q),
         "language": lang,
         "section": "news",
         "items": items,
@@ -138,17 +180,16 @@ def get_notices(
 @router.get("/ballots")
 def get_ballots(
     limit: int = Query(default=20, ge=1, le=100),
-    city: str = Query(default=DEFAULT_CITY),
+    city: str = Query(default="all"),
     language: str = Query(default="en"),
 ) -> dict:
     lang = language.lower().strip()
     if lang not in SUPPORTED_LANGUAGES:
         lang = "en"
-    items = _list_docs(
-        city.strip() or DEFAULT_CITY, ("ballot", "voter_guide"), limit, lang
-    )
+    city_q = city.strip() or "all"
+    items = _list_docs(city_q, ("ballot", "voter_guide"), limit, lang)
     return {
-        "city": city.strip() or DEFAULT_CITY,
+        "city": _response_city(city_q),
         "language": lang,
         "section": "ballots",
         "items": items,

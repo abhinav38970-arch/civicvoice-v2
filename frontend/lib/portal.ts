@@ -22,6 +22,7 @@ export const PROFESSIONS = [
 ];
 
 export const NEWS_SIDEBAR = [
+  { slug: "for-you", key: "newsForYou" as const },
   { slug: "all", key: "newsAll" as const },
   { slug: "housing", key: "topicHousing" as const },
   { slug: "jobs", key: "topicJobs" as const },
@@ -32,6 +33,15 @@ export const NEWS_SIDEBAR = [
   { slug: "elections", key: "topicElections" as const },
   { slug: "benefits", key: "topicBenefits" as const },
 ];
+
+/** News city filter pills — matches v1 (All / Fremont / Newark / Union City / Alameda County). */
+export const NEWS_CITIES = [
+  { id: "all", key: "city_all" as const },
+  { id: "Fremont", key: "city_fremont" as const },
+  { id: "Newark", key: "city_newark" as const },
+  { id: "Union City", key: "city_union_city" as const },
+  { id: "Alameda County", key: "city_alameda" as const },
+] as const;
 
 export const BALLOT_SIDEBAR = [
   { slug: "measures", key: "ballotAll" as const },
